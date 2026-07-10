@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RGS Sixth Form — Opportunities Board</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --navy-ink:#16233F;
+  --navy-deep:#0E1830;
+  --gold-signet:#C9A24C;
+  --gold-soft:#E4CE93;
+  --parchment:#F6F3EA;
+  --paper:#FFFFFF;
+  --ink-slate:#4A5468;
+  --ink-faint:#8B93A6;
+  --urgent-red:#B4332F;
+  --sage-confirm:#5C7A5C;
+  --line:#DDD6C4;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--parchment);
+  color:var(--navy-ink);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+#app{max-width:920px;margin:0 auto;padding:0 20px 80px;}
+
+header.site{
+  padding:40px 0 24px;
+  border-bottom:3px solid var(--navy-ink);
+  margin-bottom:28px;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--gold-signet);
+  background:var(--navy-ink);
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:2px;
+  margin-bottom:14px;
+}
+h1.title{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:clamp(28px,4.5vw,42px);
+  margin:0 0 6px;
+  letter-spacing:-.01em;
+}
+p.subtitle{
+  margin:0;
+  color:var(--ink-slate);
+  font-size:15px;
+  max-width:60ch;
+}
+
+nav.tabs{
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+  margin-bottom:26px;
+  border-bottom:1px solid var(--line);
+}
+nav.tabs button{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;
+  letter-spacing:.04em;
+  background:none;
+  border:none;
+  padding:10px 14px;
+  cursor:pointer;
+  color:var(--ink-slate);
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+  transition:color .15s;
+}
+nav.tabs button:hover{color:var(--navy-ink);}
+nav.tabs button.active{color:var(--navy-ink);border-bottom-color:var(--gold-signet);font-weight:600;}
+nav.tabs button .count{
+  display:inline-block;
+  margin-left:5px;
+  background:var(--line);
+  color:var(--navy-ink);
+  border-radius:10px;
+  font-size:10.5px;
+  padding:1px 6px;
+}
+nav.tabs button.active .count{background:var(--gold-signet);color:var(--navy-deep);}
+
+.rolebar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:12px 16px;
+  margin-bottom:24px;
+  font-size:13px;
+}
+.rolebar .who{color:var(--ink-slate);}
+.rolebar select, .rolebar input[type=text], .rolebar input[type=email]{
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:5px 8px;
+  background:var(--parchment);
+}
+.rolebar strong{color:var(--navy-ink);}
+.staff-badge{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  background:var(--gold-signet);
+  color:var(--navy-deep);
+  padding:2px 7px;
+  border-radius:10px;
+  margin-left:6px;
+}
+.btn-link{background:none;border:none;color:var(--navy-ink);text-decoration:underline;cursor:pointer;font-size:13px;padding:0;}
+
+.add-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;
+  letter-spacing:.03em;
+  background:var(--navy-ink);
+  color:var(--parchment);
+  border:none;
+  padding:10px 16px;
+  border-radius:4px;
+  cursor:pointer;
+  margin-bottom:24px;
+}
+.add-toggle:hover{background:var(--navy-deep);}
+.add-toggle:disabled{opacity:.5;cursor:not-allowed;}
+
+.form-panel{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-left:4px solid var(--gold-signet);
+  border-radius:6px;
+  padding:22px;
+  margin-bottom:28px;
+  display:none;
+}
+.form-panel.open{display:block;}
+.form-panel h3{
+  font-family:'Fraunces',serif;
+  margin:0 0 16px;
+  font-size:19px;
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{margin-bottom:14px;}
+.field label{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--ink-slate);
+  margin-bottom:5px;
+}
+.field input, .field select, .field textarea{
+  width:100%;
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  padding:9px 10px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--parchment);
+  color:var(--navy-ink);
+}
+.field textarea{resize:vertical;min-height:56px;}
+.form-actions{display:flex;gap:10px;align-items:center;margin-top:6px;}
+.btn-primary{
+  background:var(--navy-ink);color:#fff;border:none;padding:10px 18px;
+  border-radius:4px;font-weight:600;font-size:13.5px;cursor:pointer;
+}
+.btn-primary:hover{background:var(--navy-deep);}
+.btn-ghost{
+  background:none;border:1px solid var(--line);padding:10px 16px;
+  border-radius:4px;font-size:13.5px;cursor:pointer;color:var(--ink-slate);
+}
+.note-inline{font-size:12px;color:var(--ink-faint);margin-top:4px;}
+
+.section-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--ink-slate);
+  margin:26px 0 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--line);}
+
+.card{
+  display:flex;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:6px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.stub{
+  width:104px;
+  flex-shrink:0;
+  color:var(--parchment);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
+  position:relative;
+  padding:10px 6px;
+  text-align:center;
+}
+.stub::after{
+  content:'';
+  position:absolute;
+  right:-1px;top:0;bottom:0;width:12px;
+  background-image:radial-gradient(circle, var(--parchment) 4.5px, transparent 5px);
+  background-size:12px 15px;
+  background-repeat:repeat-y;
+  background-position:center;
+}
+.stub .day{font-size:24px;font-weight:600;line-height:1;}
+.stub .mon{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;opacity:.85;}
+.stub .countdown{font-size:9.5px;margin-top:8px;letter-spacing:.04em;text-transform:uppercase;opacity:.9;}
+
+.card-body{padding:14px 18px 14px 22px;flex:1;min-width:0;}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.card-title{
+  font-family:'Fraunces',serif;
+  font-size:17px;
+  font-weight:600;
+  margin:0 0 3px;
+  color:var(--navy-ink);
+}
+.card-org{font-size:13px;color:var(--ink-slate);margin:0 0 8px;}
+.tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:10px;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.card-notes{font-size:13px;color:var(--ink-slate);margin:6px 0 8px;line-height:1.5;}
+.card-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+.card-link{font-size:13px;color:var(--navy-ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--gold-signet);}
+.card-meta{font-size:11.5px;color:var(--ink-faint);}
+
+.approve-row{display:flex;gap:8px;margin-top:10px;}
+.btn-approve{background:var(--sage-confirm);color:#fff;border:none;padding:7px 14px;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600;}
+.btn-reject{background:none;border:1px solid var(--urgent-red);color:var(--urgent-red);padding:7px 14px;border-radius:4px;font-size:12.5px;cursor:pointer;}
+
+.empty{
+  text-align:center;padding:50px 20px;color:var(--ink-faint);
+  border:1px dashed var(--line);border-radius:6px;font-size:14px;
+}
+.empty strong{display:block;color:var(--ink-slate);font-size:16px;margin-bottom:6px;font-family:'Fraunces',serif;}
+
+.signin-box{max-width:280px;}
+.signin-box input{margin-bottom:8px;}
+.banner{
+  background:#FBF1DC;border:1px solid var(--gold-soft);border-radius:6px;
+  padding:10px 14px;font-size:12.5px;color:#8A6A1E;margin-bottom:18px;
+}
+
+@media(max-width:600px){
+  .card{flex-direction:row;}
+  .stub{width:76px;}
+  .stub .day{font-size:19px;}
+  .grid2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="site">
+    <span class="eyebrow">RGS Reading · Sixth Form</span>
+    <h1 class="title">Opportunities Board</h1>
+    <p class="subtitle">Open days, deadlines, summer schools and widening-participation programmes — one feed, always sorted by what's coming up first.</p>
+  </header>
+
+  <div id="configWarning"></div>
+
+  <div class="rolebar" id="roleBar">
+    <div class="who" id="whoBox">Checking sign-in status…</div>
+    <div id="authControls"></div>
+  </div>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <button class="add-toggle" id="addToggle">+ Add an opportunity</button>
+
+  <div class="form-panel" id="formPanel">
+    <h3>New opportunity</h3>
+    <div class="grid2">
+      <div class="field"><label>Title</label><input type="text" id="f-title" placeholder="e.g. Sutton Trust Summer School — Law"></div>
+      <div class="field"><label>Organisation</label><input type="text" id="f-org" placeholder="e.g. University of Bristol"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Type</label>
+        <select id="f-type">
+          <option>Open Day</option>
+          <option>Application Deadline</option>
+          <option>Summer School</option>
+          <option>Scholarship / Bursary</option>
+          <option>Widening Participation</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Date</label><input type="date" id="f-date"></div>
+    </div>
+    <div class="field"><label>Link</label><input type="text" id="f-link" placeholder="https://…"></div>
+    <div class="field"><label>Your display name</label><input type="text" id="f-name" placeholder="e.g. Mr Stefan, Head of Sixth Form"></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Eligibility, year group, anything students should know"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-primary" id="submitBtn">Post opportunity</button>
+      <button class="btn-ghost" id="cancelBtn">Cancel</button>
+    </div>
+    <p class="note-inline" id="submitNote"></p>
+  </div>
+
+  <div id="feed"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   SUPABASE CONFIG — fill these in from your Supabase project
+   Settings → API → Project URL / anon public key
+   ============================================================ */
+const SUPABASE_URL = 'https://booctymimsjrbpjfyrea.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_L_qqsp06eDKk2qjMbAmKOQ_VgfuSDwt';
+
+let supabase = null;
+let configured = SUPABASE_URL.startsWith('https://') && SUPABASE_ANON_KEY.length > 20;
+if(configured){
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  document.getElementById('configWarning').innerHTML =
+    `<div class="banner">This page isn't connected to a database yet. Fill in SUPABASE_URL and SUPABASE_ANON_KEY near the top of the file's script section — see the setup notes for where to find them.</div>`;
+}
+
+let session = null;
+let isStaff = false;
+let approved = [];
+let pending = [];
+let activeTab = 'week';
+
+function addDays(n){ const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr+'T00:00:00');
+  return Math.round((d-today)/86400000);
+}
+function bucketOf(dateStr){
+  const n = daysUntil(dateStr);
+  if(n < 0) return 'past';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = (today.getDay()+6)%7;
+  const endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + (6-dow));
+  const d = new Date(dateStr+'T00:00:00');
+  if(d <= endOfWeek) return 'week';
+  if(d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) return 'month';
+  return 'later';
+}
+function countdownLabel(dateStr){
+  const n = daysUntil(dateStr);
+  if(n < 0) return 'Past';
+  if(n === 0) return 'Today';
+  if(n === 1) return 'Tomorrow';
+  if(n < 14) return `in ${n} days`;
+  const w = Math.round(n/7);
+  return `in ${w} week${w>1?'s':''}`;
+}
+function stubColor(dateStr){
+  const n = daysUntil(dateStr);
+  if(n <= 2) return 'var(--urgent-red)';
+  if(n <= 7) return 'var(--navy-ink)';
+  return 'var(--navy-deep)';
+}
+function tagStyle(type){
+  const map = {
+    'Open Day': ['#EAF0F6','#2C5478'],
+    'Application Deadline': ['#F8E8E7','var(--urgent-red)'],
+    'Summer School': ['#FBF1DC','#8A6A1E'],
+    'Scholarship / Bursary': ['#E9F0E9','var(--sage-confirm)'],
+    'Widening Participation': ['#EFEAF6','#5C4A8A'],
+    'Other': ['#EDEDED','var(--ink-slate)'],
+  };
+  const [bg,fg] = map[type] || map['Other'];
+  return `background:${bg};color:${fg};`;
+}
+function fmtDate(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  return { day: d.getDate(), mon: d.toLocaleString('en-GB',{month:'short'}) };
+}
+function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- AUTH ---------- */
+async function refreshAuthState(){
+  if(!configured) return;
+  const { data: { session: s } } = await supabase.auth.getSession();
+  session = s;
+  isStaff = false;
+  if(session){
+    const { data } = await supabase.from('staff_emails').select('email').eq('email', session.user.email.toLowerCase());
+    isStaff = !!(data && data.length);
+  }
+  renderAuthUI();
+}
+
+function renderAuthUI(){
+  const whoBox = document.getElementById('whoBox');
+  const controls = document.getElementById('authControls');
+  if(session){
+    whoBox.innerHTML = `Signed in as <strong>${escapeHTML(session.user.email)}</strong>${isStaff ? '<span class="staff-badge">Staff</span>' : ''}`;
+    controls.innerHTML = `<button class="btn-link" id="signOutBtn">Sign out</button>`;
+    document.getElementById('signOutBtn').addEventListener('click', async ()=>{
+      await supabase.auth.signOut();
+      await refreshAuthState();
+      loadAll();
+    });
+  } else {
+    whoBox.textContent = 'Browsing the board — sign in to post an opportunity';
+    controls.innerHTML = `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="email" id="signInEmail" placeholder="you@rgsreading.co.uk" style="width:200px;">
+        <button class="btn-primary" id="signInBtn" style="padding:6px 12px;font-size:12.5px;">Send sign-in link</button>
+      </div>`;
+    document.getElementById('signInBtn').addEventListener('click', async ()=>{
+      const email = document.getElementById('signInEmail').value.trim();
+      if(!email) return;
+      const btn = document.getElementById('signInBtn');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
+      btn.textContent = error ? 'Something went wrong' : 'Check your email!';
+    });
+  }
+  document.getElementById('addToggle').disabled = !session;
+}
+
+/* ---------- DATA ---------- */
+async function loadAll(){
+  if(!configured){ render(); return; }
+  const { data: approvedData } = await supabase.from('opportunities').select('*').eq('status','approved').order('date');
+  approved = approvedData || [];
+
+  pending = [];
+  if(isStaff){
+    const { data: pendingData } = await supabase.from('opportunities').select('*').eq('status','pending').order('date');
+    pending = pendingData || [];
+  }
+  render();
+}
+
+function tabCounts(){
+  const upcoming = approved.filter(o => daysUntil(o.date) >= 0);
+  return {
+    week: upcoming.filter(o=>bucketOf(o.date)==='week').length,
+    month: upcoming.filter(o=>bucketOf(o.date)==='month').length,
+    all: upcoming.length,
+    approvals: pending.length,
+  };
+}
+
+function render(){
+  const counts = tabCounts();
+  const tabs = document.getElementById('tabs');
+  const tabDefs = [
+    {id:'week', label:'This Week', count:counts.week},
+    {id:'month', label:'This Month', count:counts.month},
+    {id:'all', label:'All Upcoming', count:counts.all},
+  ];
+  if(isStaff){ tabDefs.push({id:'approvals', label:'Approval Queue', count:counts.approvals}); }
+  if(activeTab==='approvals' && !isStaff) activeTab = 'week';
+  tabs.innerHTML = tabDefs.map(t=>
+    `<button data-tab="${t.id}" class="${activeTab===t.id?'active':''}">${t.label}<span class="count">${t.count}</span></button>`
+  ).join('');
+  tabs.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{activeTab=b.dataset.tab; render();}));
+
+  const feed = document.getElementById('feed');
+
+  if(activeTab==='approvals'){
+    if(pending.length===0){
+      feed.innerHTML = `<div class="empty"><strong>Nothing waiting for approval</strong>Student-submitted opportunities and search suggestions will appear here for you to check before they go live.</div>`;
+      return;
+    }
+    feed.innerHTML = `<div class="section-label">Awaiting approval</div>` + pending.map(cardHTML).join('');
+    attachCardHandlers();
+    return;
+  }
+
+  let list = approved.filter(o => daysUntil(o.date) >= 0);
+  if(activeTab==='week') list = list.filter(o=>bucketOf(o.date)==='week');
+  if(activeTab==='month') list = list.filter(o=>bucketOf(o.date)==='month');
+  list.sort((a,b)=> a.date.localeCompare(b.date));
+
+  if(list.length===0){
+    feed.innerHTML = `<div class="empty"><strong>Nothing here yet</strong>${activeTab==='week' ? 'No opportunities land within this week — check This Month, or add one.' : 'Add the first opportunity using the button above.'}</div>`;
+    return;
+  }
+  feed.innerHTML = list.map(cardHTML).join('');
+  attachCardHandlers();
+}
+
+function cardHTML(o){
+  const {day,mon} = fmtDate(o.date);
+  const isPending = o.status === 'pending';
+  return `
+  <div class="card">
+    <div class="stub" style="background:${stubColor(o.date)};">
+      <div class="day">${day}</div>
+      <div class="mon">${mon}</div>
+      <div class="countdown">${countdownLabel(o.date)}</div>
+    </div>
+    <div class="card-body">
+      <div class="card-top">
+        <div>
+          <p class="card-title">${escapeHTML(o.title)}</p>
+          <p class="card-org">${escapeHTML(o.org || '')}</p>
+        </div>
+        <span class="tag" style="${tagStyle(o.type)}">${o.type}</span>
+      </div>
+      ${o.notes ? `<p class="card-notes">${escapeHTML(o.notes)}</p>` : ''}
+      <div class="card-foot">
+        ${o.link ? `<a class="card-link" href="${escapeHTML(o.link)}" target="_blank" rel="noopener">Visit page →</a>` : '<span></span>'}
+        <span class="card-meta">Added by ${escapeHTML(o.submitted_by || o.submitted_email || 'Unknown')}</span>
+      </div>
+      ${isPending ? `<div class="approve-row"><button class="btn-approve" data-id="${o.id}" data-action="approve">Approve &amp; publish</button><button class="btn-reject" data-id="${o.id}" data-action="reject">Reject</button></div>` : ''}
+      ${!isPending && isStaff ? `<div class="approve-row"><button class="btn-reject" data-id="${o.id}" data-action="delete">Remove from board</button></div>` : ''}
+    </div>
+  </div>`;
+}
+
+function attachCardHandlers(){
+  document.querySelectorAll('[data-action]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if(action==='delete' || action==='reject'){
+        await supabase.from('opportunities').delete().eq('id', id);
+      } else if(action==='approve'){
+        await supabase.from('opportunities').update({ status:'approved' }).eq('id', id);
+      }
+      await loadAll();
+    });
+  });
+}
+
+/* ---------- FORM ---------- */
+document.getElementById('addToggle').addEventListener('click', ()=>{
+  if(!session) return;
+  document.getElementById('formPanel').classList.toggle('open');
+});
+document.getElementById('cancelBtn').addEventListener('click', ()=>{
+  document.getElementById('formPanel').classList.remove('open');
+});
+
+document.getElementById('submitBtn').addEventListener('click', async ()=>{
+  if(!session) return;
+  const title = document.getElementById('f-title').value.trim();
+  const org = document.getElementById('f-org').value.trim();
+  const type = document.getElementById('f-type').value;
+  const date = document.getElementById('f-date').value;
+  const link = document.getElementById('f-link').value.trim();
+  const name = document.getElementById('f-name').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+  const note = document.getElementById('submitNote');
+
+  if(!title || !date){
+    note.textContent = 'Please add at least a title and a date.';
+    note.style.color = 'var(--urgent-red)';
+    return;
+  }
+  const { error } = await supabase.from('opportunities').insert([{
+    title, org: org || 'Not specified', type, date, link, notes,
+    submitted_by: name || session.user.email,
+    submitted_email: session.user.email
+    // status is set server-side by a database trigger — the client can't set it directly
+  }]);
+
+  if(error){
+    note.textContent = 'Something went wrong: ' + error.message;
+    note.style.color = 'var(--urgent-red)';
+    return;
+  }
+  note.textContent = isStaff ? 'Posted to the live feed.' : 'Submitted — a staff member will review it before it goes live.';
+  note.style.color = 'var(--sage-confirm)';
+  ['f-title','f-org','f-date','f-link','f-name','f-notes'].forEach(id=>document.getElementById(id).value='');
+  await loadAll();
+  setTimeout(()=>{ document.getElementById('formPanel').classList.remove('open'); note.textContent=''; }, 1400);
+});
+
+/* ---------- INIT ---------- */
+async function init(){
+  if(configured){
+    supabase.auth.onAuthStateChange((_event, s) => {
+      session = s;
+      refreshAuthState().then(loadAll);
+    });
+  }
+  await refreshAuthState();
+  await loadAll();
+}
+init();
+</script>
+</body>
+</html>
