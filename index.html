@@ -353,13 +353,19 @@ nav.tabs button.active .count{background:var(--gold-signet);color:var(--navy-dee
    SUPABASE CONFIG — fill these in from your Supabase project
    Settings → API → Project URL / anon public key
    ============================================================ */
-const SUPABASE_URL = 'https://booctymimsjrbpjfyrea.supabase.co/rest/v1/';
-const SUPABASE_ANON_KEY = 'sb_publishable_L_qqsp06eDKk2qjMbAmKOQ_VgfuSDwt';
+const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
 
-let supabase = null;
+let sbClient = null;
 let configured = SUPABASE_URL.startsWith('https://') && SUPABASE_ANON_KEY.length > 20;
 if(configured){
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  try{
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }catch(e){
+    configured = false;
+    document.getElementById('configWarning').innerHTML =
+      `<div class="banner">Couldn't set up the database connection (${escapeHTML(e.message)}). Check the Project URL and key are pasted in correctly, with no extra spaces or missing characters.</div>`;
+  }
 } else {
   document.getElementById('configWarning').innerHTML =
     `<div class="banner">This page isn't connected to a database yet. Fill in SUPABASE_URL and SUPABASE_ANON_KEY near the top of the file's script section — see the setup notes for where to find them.</div>`;
@@ -423,12 +429,16 @@ function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':
 
 /* ---------- AUTH ---------- */
 async function refreshAuthState(){
-  if(!configured) return;
-  const { data: { session: s } } = await supabase.auth.getSession();
+  if(!configured){
+    document.getElementById('whoBox').textContent = 'Not connected to the database — see the yellow banner above.';
+    document.getElementById('authControls').innerHTML = '';
+    return;
+  }
+  const { data: { session: s } } = await sbClient.auth.getSession();
   session = s;
   isStaff = false;
   if(session){
-    const { data } = await supabase.from('staff_emails').select('email').eq('email', session.user.email.toLowerCase());
+    const { data } = await sbClient.from('staff_emails').select('email').eq('email', session.user.email.toLowerCase());
     isStaff = !!(data && data.length);
   }
   renderAuthUI();
@@ -441,7 +451,7 @@ function renderAuthUI(){
     whoBox.innerHTML = `Signed in as <strong>${escapeHTML(session.user.email)}</strong>${isStaff ? '<span class="staff-badge">Staff</span>' : ''}`;
     controls.innerHTML = `<button class="btn-link" id="signOutBtn">Sign out</button>`;
     document.getElementById('signOutBtn').addEventListener('click', async ()=>{
-      await supabase.auth.signOut();
+      await sbClient.auth.signOut();
       await refreshAuthState();
       loadAll();
     });
@@ -457,7 +467,7 @@ function renderAuthUI(){
       if(!email) return;
       const btn = document.getElementById('signInBtn');
       btn.disabled = true; btn.textContent = 'Sending…';
-      const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
+      const { error } = await sbClient.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
       btn.textContent = error ? 'Something went wrong' : 'Check your email!';
     });
   }
@@ -467,12 +477,12 @@ function renderAuthUI(){
 /* ---------- DATA ---------- */
 async function loadAll(){
   if(!configured){ render(); return; }
-  const { data: approvedData } = await supabase.from('opportunities').select('*').eq('status','approved').order('date');
+  const { data: approvedData } = await sbClient.from('opportunities').select('*').eq('status','approved').order('date');
   approved = approvedData || [];
 
   pending = [];
   if(isStaff){
-    const { data: pendingData } = await supabase.from('opportunities').select('*').eq('status','pending').order('date');
+    const { data: pendingData } = await sbClient.from('opportunities').select('*').eq('status','pending').order('date');
     pending = pendingData || [];
   }
   render();
@@ -563,9 +573,9 @@ function attachCardHandlers(){
       const id = btn.dataset.id;
       const action = btn.dataset.action;
       if(action==='delete' || action==='reject'){
-        await supabase.from('opportunities').delete().eq('id', id);
+        await sbClient.from('opportunities').delete().eq('id', id);
       } else if(action==='approve'){
-        await supabase.from('opportunities').update({ status:'approved' }).eq('id', id);
+        await sbClient.from('opportunities').update({ status:'approved' }).eq('id', id);
       }
       await loadAll();
     });
@@ -597,7 +607,7 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
     note.style.color = 'var(--urgent-red)';
     return;
   }
-  const { error } = await supabase.from('opportunities').insert([{
+  const { error } = await sbClient.from('opportunities').insert([{
     title, org: org || 'Not specified', type, date, link, notes,
     submitted_by: name || session.user.email,
     submitted_email: session.user.email
@@ -619,7 +629,7 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
 /* ---------- INIT ---------- */
 async function init(){
   if(configured){
-    supabase.auth.onAuthStateChange((_event, s) => {
+    sbClient.auth.onAuthStateChange((_event, s) => {
       session = s;
       refreshAuthState().then(loadAll);
     });
