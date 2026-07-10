@@ -212,11 +212,39 @@ nav.tabs button.active .count{background:var(--gold-signet);color:var(--navy-dee
 
 .card{
   display:flex;
+  position:relative;
   background:var(--paper);
   border:1px solid var(--line);
   border-radius:6px;
   overflow:hidden;
   margin-bottom:12px;
+}
+.card.ucas{
+  border:2px solid var(--navy-ink);
+  box-shadow:0 2px 10px rgba(22,35,63,0.12);
+  margin-top:6px;
+}
+.ucas-stripe{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:5px;
+  background:repeating-linear-gradient(
+    45deg,
+    var(--urgent-red), var(--urgent-red) 10px,
+    var(--gold-signet) 10px, var(--gold-signet) 20px
+  );
+}
+.ucas-banner{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--urgent-red);
+  font-weight:600;
+  margin-bottom:4px;
+  display:flex;
+  align-items:center;
+  gap:5px;
 }
 .stub{
   width:104px;
@@ -324,6 +352,7 @@ nav.tabs button.active .count{background:var(--gold-signet);color:var(--navy-dee
       <div class="field"><label>Type</label>
         <select id="f-type">
           <option>Open Day</option>
+          <option>UCAS Deadline</option>
           <option>Application Deadline</option>
           <option>Summer School</option>
           <option>Scholarship / Bursary</option>
@@ -349,6 +378,7 @@ nav.tabs button.active .count{background:var(--gold-signet);color:var(--navy-dee
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+
 /* ============================================================
    SUPABASE CONFIG — fill these in from your Supabase project
    Settings → API → Project URL / anon public key
@@ -412,6 +442,7 @@ function stubColor(dateStr){
 function tagStyle(type){
   const map = {
     'Open Day': ['#EAF0F6','#2C5478'],
+    'UCAS Deadline': ['var(--navy-ink)','var(--gold-soft)'],
     'Application Deadline': ['#F8E8E7','var(--urgent-red)'],
     'Summer School': ['#FBF1DC','#8A6A1E'],
     'Scholarship / Bursary': ['#E9F0E9','var(--sage-confirm)'],
@@ -468,7 +499,8 @@ function renderAuthUI(){
       const btn = document.getElementById('signInBtn');
       btn.disabled = true; btn.textContent = 'Sending…';
       const { error } = await sbClient.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
-      btn.textContent = error ? 'Something went wrong' : 'Check your email!';
+      btn.textContent = error ? ('Error: ' + error.message) : 'Check your email!';
+      if(error) console.error('Sign-in error:', error);
     });
   }
   document.getElementById('addToggle').disabled = !session;
@@ -541,14 +573,17 @@ function render(){
 function cardHTML(o){
   const {day,mon} = fmtDate(o.date);
   const isPending = o.status === 'pending';
+  const isUcas = o.type === 'UCAS Deadline';
   return `
-  <div class="card">
-    <div class="stub" style="background:${stubColor(o.date)};">
+  <div class="card${isUcas ? ' ucas' : ''}">
+    ${isUcas ? '<div class="ucas-stripe"></div>' : ''}
+    <div class="stub" style="background:${isUcas ? 'var(--navy-ink)' : stubColor(o.date)};">
       <div class="day">${day}</div>
       <div class="mon">${mon}</div>
       <div class="countdown">${countdownLabel(o.date)}</div>
     </div>
     <div class="card-body">
+      ${isUcas ? '<div class="ucas-banner">📌 National UCAS deadline — applies to all applicants</div>' : ''}
       <div class="card-top">
         <div>
           <p class="card-title">${escapeHTML(o.title)}</p>
@@ -641,3 +676,4 @@ init();
 </script>
 </body>
 </html>
+
